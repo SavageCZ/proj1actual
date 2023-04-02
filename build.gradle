@@ -1,0 +1,129 @@
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+
+task go() {
+    doLast{
+        go();
+    }
+}
+
+task go2(){
+    doLast{
+        go2();
+    }
+}
+task recursiveChildrenScan(){
+    doLast{
+        recursiveChildrenScan;
+    }
+}
+
+
+import groovy.json.JsonSlurper
+
+def go(){
+    def headers = [ Accept: 'application/json' ]
+    def jsonText = new URL( "https://restcountries.com/v3.1/all" ).getText( requestProperties: headers )
+    def parsedJson = new JsonSlurper().parseText( jsonText ) as Map
+    // use parse Json
+    println "parsedJson = $parsedJson"
+    //assert parsedJson.name != null
+
+    new File( 'my-file.json' ).write jsonText
+}
+
+
+def go2(){
+    def jsonSlurper = new JsonSlurper()
+
+    def config = jsonSlurper.parse(new File('my-file.json'))
+
+    println "${config.capitalInfo}"
+    println "${config.name.common}"
+
+}
+
+
+import groovy.json.JsonSlurper
+def go2(){
+    def jsonSlurper = new JsonSlurper()
+
+    def config = jsonSlurper.parse(new File('my-file.json'))
+
+    println "${config.capitalInfo}"
+    println "${config.name.common}"
+    println "${config.borders}"
+    println "${config.cca3}"
+}
+
+
+    def headers = [ Accept: 'application/json' ]
+    def jsonTxt = new URL( "https://restcountries.com/v3.1/all" ).getText(     requestProperties: headers )
+    def json = new groovy.json.JsonSlurper().parseText(jsonTxt)
+
+    def recursiveChildrenScan(map, key, value) {
+        if (!map) {
+            null
+        } else if (map[key] == value) {
+            map.children
+        } else {
+            map.children.findResult { recursiveChildrenScan(it, key, value) }
+        }
+    }
+
+    println json.findResult { recursiveChildrenScan(it, 'borders', '') }?.label
+
+
+task myTask{
+    doLast{
+        def inputFile = new File("my-file.json")
+        //def json = new JsonSlurper().parseText(inputFile.text)
+        def labels = json.name.common //This will return "pqr"
+    }
+
+
+}
+
+// List literal
+    test.includes = ['https://restcountries.com/v3.1/all?fields=borders', 'https://restcountries.com/v3.1/all?fields=cca3']
+
+    List<String> list = new ArrayList<String>()
+    list.add('https://restcountries.com/v3.1/all?fields=cca3')
+    list.add('https://restcountries.com/v3.1/all?fields=borders')
+    test.includes = list
+
+// Map literal.
+    Map<String, String> map = [key1: 'CZE', key2: 'CZE']
+
+// Groovy will coerce named arguments
+// into a single map argument
+    apply plugin: 'java'
+
+
+
+dependencies {
+    // https://mvnrepository.com/artifact/com.vividsolutions/jts
+    implementation group: 'com.vividsolutions', name: 'jts', version: '1.13'
+
+    // https://mvnrepository.com/artifact/org.postgresql/postgresql
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.0'
+
+    implementation 'org.codehaus.groovy:groovy-all:3.0.13'
+    implementation 'org.codehaus.groovy:groovy-json:3.0.13'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+}
+
+test {
+    useJUnitPlatform()
+}
